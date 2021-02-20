@@ -52,6 +52,7 @@ export const Game = (props) => {
 
             console.log('wee');
         })
+        // TODO: add deck and discard functionality
 
         return function () {
             socket.off('serverToClientPlayers');
