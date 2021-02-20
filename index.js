@@ -12,6 +12,7 @@ const io = socketio(server);
 const { Deck } = require('./utils/deck.js');
 
 //game logic
+// TODO: add deck and discard fucntionality
 let players = [];
 const deck = new Deck;
 deck.reset();
