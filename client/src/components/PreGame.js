@@ -5,10 +5,6 @@ import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux'
 import { setNickname } from '../redux/NicknameReducer';
 
-function rand() {
-    return Math.round(Math.random() * 20) - 10;
-}
-
 function getModalStyle() {
     const top = 50;
     const left = 50;
@@ -36,14 +32,15 @@ export const PreGame = () => {
     const dispatch = useDispatch();
     // getModalStyle is not a pure function, we roll the style only on the first render
     const [modalStyle] = React.useState(getModalStyle);
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = React.useState(true);
 
     const handleOpen = () => {
         setOpen(true);
     };
 
-    const handleClose = () => {
+    const handleClose = (event) => {
         setOpen(false);
+        // event.preventDefault();
     };
 
     const body = (
@@ -52,9 +49,9 @@ export const PreGame = () => {
             <p id="simple-modal-description">
                 What's your nickname?
             </p>
-            <form>
+            <form onSubmit={handleClose} to="/game">
                 <input type='text' onChange={(e) => dispatch(setNickname(e.target.value))} />
-                <button type='submit' onClick={handleClose}><Link to="/game" onClick={handleClose} style={{ textDecoration: 'none' }}>Submit</Link></button>
+                <Link to="/game" style={{ textDecoration: 'none' }}><button type='submit'>Submit</button></Link>
             </form>
 
         </div>

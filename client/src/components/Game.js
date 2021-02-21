@@ -27,9 +27,10 @@ export const Game = (props) => {
     const classes = useStyles();
     const nickname = useSelector(state => state.nickname.nickname)
 
-    console.log('redux pls', nickname);
+    // console.log('redux pls', nickname);
 
     const [players, setPlayers] = useState([]);
+    const [nextCard, setNextCard] = useState({});
     const [id, setId] = useState('');
 
     useEffect(() => {
@@ -48,11 +49,18 @@ export const Game = (props) => {
             setId(id);
 
         });
+
+        // TODO: add deck and discard functionality
+        socket.on('serverToClientGameState', ([nextCard]) => {
+            setNextCard(nextCard)
+
+            // console.log('client:', nextCard);
+        })
+
         socket.on('wee', () => {
 
             console.log('wee');
         })
-        // TODO: add deck and discard functionality
 
         return function () {
             socket.off('serverToClientPlayers');
@@ -71,12 +79,12 @@ export const Game = (props) => {
                         <Grid container spacing={3}>
                             <Grid item xs={12} sm={12}>
                                 <Typography variant='h6'>Next Card</Typography>
-                                <PlayingCard />
+                                <PlayingCard image={`cards/${nextCard.visVal}${nextCard.suit}.png`}/>
                             </Grid>
 
                             <Grid item xs={12} sm={12}>
                                 <Typography variant='h6'>Discard</Typography>
-                                <PlayingCard />
+                                <PlayingCard image={`cards/red_back.png`}/>
                             </Grid>
                         </Grid>
                     </Paper>
@@ -92,9 +100,9 @@ export const Game = (props) => {
                                     {/* Hand Map */}
                                     {
                                         player.s === id
-                                            ? player.h.map(card => (
+                                            ? player.h.map((card, i) => (
                                                 <Grid item xs={6} sm={6}>
-                                                    <PlayingCard image={`cards/${card.visVal}${card.suit}.png`} />
+                                                    <PlayingCard onClick={() => {console.log(`${card.visVal+card.suit}, ${i}`)}} image={`cards/${card.visVal}${card.suit}.png`} />
                                                 </Grid>
                                             ))
                                             : player.h.map(card => (
