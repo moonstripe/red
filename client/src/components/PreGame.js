@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux'
 import { setNickname } from '../redux/NicknameReducer';
 
-function getModalStyle() {
+const getModalStyle = () => {
     const top = 50;
     const left = 50;
 
@@ -60,7 +60,7 @@ export const PreGame = () => {
     return (
         <div>
             <button type="button" onClick={handleOpen}>
-                Open Modal
+                Set your nickname to join the game!
             </button>
             <Modal
                 open={open}

@@ -3,10 +3,21 @@ import { useSelector } from "react-redux";
 import { PlayingCard } from "./Card";
 
 import { makeStyles } from '@material-ui/core/styles';
-import { Paper, Grid, Typography } from '@material-ui/core';
+import { Paper, Grid, Typography, Modal } from '@material-ui/core';
 
 import io from 'socket.io-client';
 const socket = io();
+
+const getModalStyle = () => {
+    const top = 50;
+    const left = 50;
+
+    return {
+        top: `${top}%`,
+        left: `${left}%`,
+        transform: `translate(-${top}%, -${left}%)`,
+    };
+}
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -21,17 +32,69 @@ const useStyles = makeStyles((theme) => ({
         minHeight: "calc((100vh-30)/2)",
         backgroundColor: '#90EE90'
     },
+    paper: {
+        position: 'absolute',
+        width: 400,
+        backgroundColor: theme.palette.background.paper,
+        border: '2px solid #000',
+        boxShadow: theme.shadows[5],
+        padding: theme.spacing(2, 4, 3),
+    },
 }));
 
 export const Game = (props) => {
     const classes = useStyles();
     const nickname = useSelector(state => state.nickname.nickname)
 
-    // console.log('redux pls', nickname);
-
     const [players, setPlayers] = useState([]);
     const [nextCard, setNextCard] = useState({});
     const [id, setId] = useState('');
+
+    // Modal Stuff
+    const [open, setOpen] = useState(false);
+    const [modalStyle] = useState(getModalStyle);
+
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = (event) => {
+        setOpen(false);
+    };
+
+    const handleCardSwap = (card, i, replacement) => {
+        console.log(`${card.visVal+card.suit}, ${i}, ${replacement.visVal+replacement.suit}`)
+
+        socket.emit('clientToServerCardSwap', [card, i, replacement])
+    }
+
+    const body = (
+        <div style={modalStyle} className={classes.paper}>
+            <h2 id="simple-modal-title">What card do you want to swap with?</h2>
+            {
+                    players.map(player => (
+                        <Grid item xs={12} sm={12}>
+                            <Paper elevation={0} className={player.s === id ? classes.myHand : classes.defaultHand}>
+                                <h4>{player.s === id ? player.n : null}</h4>
+                                <Grid container spacing={3}>
+                                    {/* Hand Map */}
+                                    {
+                                        player.s === id
+                                            ? player.h.map((card, i) => (
+                                                <Grid item xs={6} sm={6}>
+                                                    <PlayingCard onClick={() => {handleCardSwap(card, i, nextCard)}} image={`cards/${card.visVal}${card.suit}.png`} />
+                                                </Grid>
+                                            ))
+                                            : null
+                                    }
+                                </Grid>
+                            </Paper>
+                        </Grid>
+                    )
+                    )
+                }
+        </div>
+    );
 
     useEffect(() => {
         socket.emit('clientToServerWelcome', nickname);
@@ -72,6 +135,15 @@ export const Game = (props) => {
     return (
         <div className={classes.root}>
             <h1>Game Screen</h1>
+            <Modal
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="simple-modal-title"
+                aria-describedby="simple-modal-description"
+            >
+                {body}
+            </Modal>
+            
             <Grid container spacing={0}>
                 {/* Deck/Garbage */}
                 <Grid item xs={2}>
@@ -79,7 +151,7 @@ export const Game = (props) => {
                         <Grid container spacing={3}>
                             <Grid item xs={12} sm={12}>
                                 <Typography variant='h6'>Next Card</Typography>
-                                <PlayingCard image={`cards/${nextCard.visVal}${nextCard.suit}.png`}/>
+                                <PlayingCard onClick={() => handleOpen()} image={`cards/${nextCard.visVal}${nextCard.suit}.png`}/>
                             </Grid>
 
                             <Grid item xs={12} sm={12}>

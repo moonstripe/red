@@ -9,7 +9,7 @@ const server = require('http').createServer(app);
 const PORT = process.env.PORT || 3001;
 
 const io = socketio(server);
-const { Deck } = require('./utils/deck.js');
+const { Card, Deck } = require('./utils/deck.js');
 
 //game logic
 // TODO: add deck and discard fucntionality
@@ -23,7 +23,7 @@ deck.shuffle();
 console.log(deck.deck.length)
 
 const dealHand = (deck) => {
-    let hand = []
+    let hand = [];
     for (let i = 0; i < 4; i++) {
         let card = deck.deal();
         hand.push(card);
@@ -68,6 +68,31 @@ io.on('connection', socket => {
         console.log(deck.deck.length)
 
     });
+
+    socket.on('clientToServerCardSwap', ([card, i, replacement]) => {
+        // console.log(socket.id + ': ' + card.visVal+card.suit + " " + i+" "+replacement.visVal+replacement.suit)
+        console.log(players[0].h)
+
+        // TODO: get this stuff working
+        
+
+        // let index = players[0].h.findIndex(i => i.visVal === card.visVal && i.suit === card.suit)
+
+        // let replacedCard = players[0].h[i]
+
+        // console.log(index)
+
+        // if (index !== -1) {
+        //     players[0].h[index] = new Card({visVal: replacement.visVal,intVal: replacement.intVal, suit: replacement.suit })
+        // }
+
+        // console.log(players[0].h, replacedCard)
+
+        // io.emit('serverToClientPlayers', players);
+
+        // let relevantPlayer = players.filter(player => player.s === socket.id)
+        // console.log(relevantPlayer.h)
+    })
 
     //    Testing only:
     socket.on('clientToServerBoop', () => {

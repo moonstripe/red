@@ -69,6 +69,7 @@ class Deck {
 }
 
 module.exports = {
+    Card, 
     Deck
 }
 //old gamelogic
