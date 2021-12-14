@@ -1,0 +1,85 @@
+{/* Old Formatting */}
+            <h1>{turnId}</h1>
+            {players.map((p) => (p.s === turnId ? <p>{p.n}'s turn</p> : <p>{p.n}</p>))}
+            <Modal
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="simple-modal-title"
+                aria-describedby="simple-modal-description"
+            >
+                {body}
+            </Modal>
+
+            <Grid container spacing={0}>
+                {/* Deck/Garbage */}
+                <Grid item xs={2}>
+                    <Paper elevation={0} sx={{ padding: 2, minHeight: "calc((100vh-30)/2)" }}>
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} sm={12}>
+                                <Typography variant='h6'>Next Card</Typography>
+                                {
+                                    turnId === id
+                                        ? <PlayingCard onClick={() => handleOpen('nextCard')} image={`/cards/${nextCard.visVal}${nextCard.suit}.png`} />
+                                        : <PlayingCard image={`/cards/${nextCard.visVal}${nextCard.suit}.png`} />
+                                }
+                            </Grid>
+                            <Grid item xs={12} sm={12}>
+                                <Typography variant='h6'>Discard</Typography>
+                                {
+                                    turnId === id
+                                        ? <PlayingCard
+                                            onClick={discard.length > 0 ? () => handleOpen('discard') : null}
+                                            image={
+                                                discard?.length > 0 ?
+                                                    `/cards/${discard[discard.length - 1].visVal}${discard[discard.length - 1].suit}.png` :
+                                                    `/cards/red_back.png`
+                                            } />
+                                        : <PlayingCard image={
+                                            discard?.length > 0 ?
+                                                `/cards/${discard[discard.length - 1].visVal}${discard[discard.length - 1].suit}.png` :
+                                                `/cards/red_back.png`
+                                        } />
+                                }
+                            </Grid>
+                        </Grid>
+                    </Paper>
+                </Grid>
+
+                {/* Player Map */}
+                {
+                    players.map(player => (
+                        <Grid item xs={5} sm={5}>
+                            <Paper elevation={0} sx={player.s === id ? { padding: 2, minHeight: "calc((100vh-30)/2)", backgroundColor: '#90EE90' } : { padding: 2, minHeight: "calc((100vh-30)/2)" }}>
+                                <h4>{player.n}</h4>
+                                <Grid container spacing={3}>
+                                    {/* Hand Map */}
+                                    {
+                                        player.s === id
+                                            ? player.h.map((card, i) => (
+                                                <Grid item xs={6} sm={6}>
+                                                    {
+                                                        card === 0
+                                                            ? <PlayingCard />
+                                                            : <PlayingCard onClick={() => handleCardSlap(card, i)} image={`/cards/${card.visVal}${card.suit}.png`} />
+                                                    }
+                                                </Grid>
+                                            ))
+                                            : player.h.map((card, i) => (
+                                                <Grid item xs={6} sm={6}>
+                                                    {
+                                                        card === 0
+                                                            ? <PlayingCard />
+                                                            : <PlayingCard onClick={() => handleCardSlap(card, i)} image={`/cards/red_back.png`} />
+                                                    }
+                                                </Grid>
+                                            ))
+                                    }
+                                </Grid>
+                            </Paper>
+                        </Grid>
+                    )
+                    )
+                }
+
+
+            </Grid>
