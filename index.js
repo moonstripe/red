@@ -16,6 +16,10 @@ const io = socketio(server, {
 const { Deck } = require('./utils/deck.js');
 const { isObject } = require('util');
 
+app.get('/', async (req, res) => {
+    res.send('hello world')
+})
+
 //game logic
 // TODO: add deck and discard fucntionality
 let rooms = {}
@@ -308,6 +312,7 @@ io.on('connection', socket => {
 });
 
 if (process.env.NODE_ENV === 'production') {
+    console.log('hello?')
     app.use(express.static('client/build'));
 }
 
