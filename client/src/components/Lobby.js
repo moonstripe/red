@@ -3,9 +3,6 @@ import { useSelector } from "react-redux";
 import { useHistory, useParams } from 'react-router';
 import { SocketContext } from '../utils/SocketContext';
 
-// import { io } from 'socket.io-client';
-// const socket = io('http://localhost:3001');
-
 const Lobby = ({socket}) => {
     const nickname = useSelector(state => state.nickname.nickname)
     const { id } = useParams();

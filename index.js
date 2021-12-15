@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 8080;
 
 const io = socketio(server, {
     cors: {
-        origin: "http://localhost:3000"
+        origin: "https://kojinglick-aq2wgmt6ca-uc.a.run.app/"
     }
 });
 const { Deck } = require('./utils/deck.js');
@@ -313,7 +313,6 @@ io.on('connection', socket => {
 });
 
 if (process.env.NODE_ENV === 'production') {
-    console.log('hello?')
 
     app.use(express.static(path.join(__dirname, "client/build")));
     app.use(express.static("public"));
@@ -330,5 +329,5 @@ if (process.env.NODE_ENV === 'production') {
 // app.use(routes);
 
 server.listen(PORT, () => {
-    console.log('Server started listening on PORT http://localhost:3001')
+    console.log(`Server started listening on PORT ${PORT}`)
 })
