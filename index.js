@@ -17,8 +17,8 @@ const io = socketio(server, {
 const { Deck } = require('./utils/deck.js');
 const { isObject } = require('util');
 
-app.get('/', async (req, res) => {
-    res.send('hello world')
+app.get('/testBackend', async (req, res) => {
+    res.send(`hello world, port: ${process.env.PORT}`)
 })
 
 //game logic
@@ -315,7 +315,7 @@ io.on('connection', socket => {
 if (process.env.NODE_ENV === 'production') {
     console.log('hello?')
 
-    app.use(express.static(path.join(__dirname, "..", "build")));
+    app.use(express.static(path.join(__dirname, "build")));
     app.use(express.static("public"));
 
     app.use((req, res, next) => {
