@@ -2,6 +2,7 @@ require('dotenv')
     .config();
 const socketio = require('socket.io');
 const express = require('express');
+const path = require('path');
 
 const app = express();
 const server = require('http').createServer(app);
@@ -177,7 +178,7 @@ io.on('connection', socket => {
             for (let i = 0; i < relevantGame.p.length; i++) {
                 const player = relevantGame.p[i];
 
-                let score = 0 
+                let score = 0
 
                 for (let j = 0; j < player.h.length; j++) {
                     const card = player.h[j];
@@ -313,7 +314,13 @@ io.on('connection', socket => {
 
 if (process.env.NODE_ENV === 'production') {
     console.log('hello?')
-    app.use(express.static('client/build'));
+
+    app.use(express.static(path.join(__dirname, "..", "build")));
+    app.use(express.static("public"));
+
+    app.use((req, res, next) => {
+        res.sendFile(path.join(__dirname, "..", "build", "index.html"));
+    });
 }
 
 // Routing option
