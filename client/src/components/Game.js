@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useParams } from 'react-router';
 import { PlayingCard } from "./Card";
 
-import { Paper, Grid, Typography, Modal, Box, Button, FormControl, MenuItem, Select, InputLabel, cardActionAreaClasses } from '@mui/material';
+import { Paper, Grid, Typography, Modal, Box, Button, MenuItem, Select, InputLabel } from '@mui/material';
 import { SocketContext } from '../utils/SocketContext';
 
 const Game = ({ socket }) => {

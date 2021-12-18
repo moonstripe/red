@@ -314,12 +314,15 @@ io.on('connection', socket => {
 
 if (process.env.NODE_ENV === 'production') {
 
-    app.use(express.static(path.join(__dirname, "client/build")));
-    app.use(express.static("public"));
+    const root = path.join(__dirname, 'client/build')
 
-    // app.use((req, res, next) => {
-    //     res.sendFile(path.join(__dirname, "client/build", "index.html"));
-    // });
+    console.log(`root: ${root}`)
+
+    app.use(express.static(path.join( root )));
+
+    app.get('*',(req, res, next) => {
+        res.sendFile('index.html', { root });
+    });
 }
 
 // Routing option
