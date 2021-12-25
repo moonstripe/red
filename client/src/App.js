@@ -6,7 +6,7 @@ import { SocketContext } from './utils/SocketContext';
 import { Box } from '@mui/material';
 
 import { io } from 'socket.io-client';
-const socket = io();
+const socket = io('localhost:3001');
 
 function App() {
 

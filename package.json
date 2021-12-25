@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "client": "cd client && npm run start",
-    "start": "npm run start:prod",
+    "client": "cd client && npm run start-client",
+    "start": "npm run start:dev",
     "start:prod": "node index.js",
     "start:dev": "concurrently \"nodemon --ignore 'client/*'\" \"npm run client\""
   },

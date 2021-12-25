@@ -1,87 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Modal from '@material-ui/core/Modal';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux'
 import { setNickname } from '../redux/NicknameReducer';
-
-
-const getModalStyle = () => {
-    const top = 50;
-    const left = 50;
-
-    return {
-        top: `${top}%`,
-        left: `${left}%`,
-        transform: `translate(-${top}%, -${left}%)`,
-    };
-}
-
-const useStyles = makeStyles((theme) => ({
-    paper: {
-        position: 'absolute',
-        width: 400,
-        backgroundColor: theme.palette.background.paper,
-        border: '2px solid #000',
-        boxShadow: theme.shadows[5],
-        padding: theme.spacing(2, 4, 3),
-    },
-}));
+import { Box, Button, Grid, TextField } from '@mui/material';
 
 export const PreGame = () => {
-    const classes = useStyles();
     const dispatch = useDispatch();
     const history = useHistory();
-    // getModalStyle is not a pure function, we roll the style only on the first render
-    const [modalStyle] = useState(getModalStyle);
-    const [open, setOpen] = useState(true);
+
     const [roomId, setRoomId] = useState('');
+    const [protoname, setProtoname] = useState('')
+    const [isTouched, setIsTouched] = useState(false);
 
-    const handleOpen = () => {
-        setOpen(true);
-    };
+    const handleNickname = (e) => {
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+        console.log(e.target.value.length)
+        if (e.target.value.length > 0) {
+            setProtoname(e.target.value)
+            setIsTouched(true)
+        } else {
+            setIsTouched(false)
+        }
+    }
+
+    const handleLobbyCode = (e) => {
+        setRoomId(e.target.value)
+    }
+
+    // dispatch(setNickname(protoname))
 
     const handleMakeRoom = () => {
+        dispatch(setNickname(protoname))
         const newName = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
         history.push(`/lobby/${newName}`)
     }
 
     const handleJoinRoom = () => {
+        dispatch(setNickname(protoname))
         history.push(`/lobby/${roomId}`)
     }
 
-    const body = (
-        <div style={modalStyle} className={classes.paper}>
-            <h2 id="simple-modal-title">Welcome To Red</h2>
-            <form onSubmit={handleClose} to="/game">
-                <p id="simple-modal-description">What's your nickname?</p>
-                <input type='text' onChange={(e) => dispatch(setNickname(e.target.value))} />
-                <button type='submit' onClick={() => { handleMakeRoom() }}>New Game</button>
-                <p id="simple-modal-description2">Name of joined game?</p>
-                <input type='text' onChange={(e) => setRoomId(e.target.value)} />
-                <button type='submit' onClick={() => { handleJoinRoom() }}>Join Game</button>
-            </form>
-
-        </div>
-    );
 
     return (
-        <div sx={{marginTop: 'auto'}}>
-            <button type="button" onClick={handleOpen}>
-                Set your nickname to join the game!
-            </button>
-            <Modal
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="simple-modal-title"
-                aria-describedby="simple-modal-description"
-            >
-                {body}
-            </Modal>
-        </div>
+        <Grid container>
+            <Grid item xs={4.5}></Grid>
+            <Grid item xs>
+                <Box sx={{ px: 2, py: 10 }}>
+                    <Box component='img' sx={{ width: '100%' }} alt="red logo featuring cards that are used in the fun and interesting family game called red." src='/redlogo.png' />
+                    <TextField color='warning' label="Enter your nickname" variant="outlined" sx={{ mt: 2, width: '100%', color: 'brown' }} onChange={(e) => handleNickname(e)} />
+                    {
+                        isTouched
+                            ? <Button variant='outlined' sx={{ mt: 2, width: '100%' }} onClick={handleMakeRoom}>New Game</Button>
+                            : <Button disabled variant='outlined' sx={{ mt: 2, width: '100%' }}>New Game</Button>
+                    }
+                    {
+                        isTouched
+                            ? (
+                                <Box>
+                                    <TextField color='warning' label="Enter your lobby code" variant="outlined" sx={{ mt: 2, width: '100%', color: 'brown' }} onChange={(e) => handleLobbyCode(e)} />
+                                    {
+                                        roomId.length > 0
+                                            ? <Button variant='outlined' sx={{ mt: 2, width: '100%' }} onClick={handleJoinRoom}>Join Game</Button>
+                                            : <Button disabled variant='outlined' sx={{ mt: 2, width: '100%' }}>Join Game</Button>
+                                    }
+                                </Box>
+                            )
+                            : null
+                    }
+
+                </Box>
+            </Grid>
+            <Grid item xs={4.5}></Grid>
+        </Grid>
     );
 }

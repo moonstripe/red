@@ -9,20 +9,21 @@ const server = require('http').createServer(app);
 
 const PORT = process.env.PORT || 8080;
 
+const DEV_ORG = '*'
+const PROD_ORG = 'https://kojinglick-aq2wgmt6ca-uc.a.run.app/'
+
 const io = socketio(server, {
     cors: {
-        origin: "https://kojinglick-aq2wgmt6ca-uc.a.run.app/"
+        origin: process.env.NODE_ENV === 'production' ? PROD_ORG : DEV_ORG
     }
 });
 const { Deck } = require('./utils/deck.js');
-const { isObject } = require('util');
 
 app.get('/testBackend', async (req, res) => {
     res.send(`hello world, port: ${process.env.PORT}`)
 })
 
 //game logic
-// TODO: add deck and discard fucntionality
 let rooms = {}
 const playerLimit = 3;
 
@@ -58,6 +59,7 @@ io.on('connection', socket => {
                 p: [{
                     n: nname,
                     s: socket.id,
+                    r: false
                 }],
                 nC: {},
                 g: []
@@ -87,6 +89,7 @@ io.on('connection', socket => {
                 rooms[id].p.push({
                     n: nname,
                     s: socket.id,
+                    r: false
                 })
 
                 console.log(`addplayer: ${JSON.stringify(rooms[id].p[rooms[id].p.length - 1])}`)
@@ -103,7 +106,17 @@ io.on('connection', socket => {
     })
 
     socket.on('clientToServerLobbyReady', id => {
-        console.log(`ready: ${rooms[id].p.length}`)
+        const relevantGame = rooms[id]
+
+        relevantGame.p.filter(p => p.s === socket.id)[0].r = true
+
+        console.log(`ready: ${relevantGame.p.filter(p => p.s === socket.id)[0].r}`)
+
+        io.to(id).emit('serverToClientPlayers', relevantGame.p)
+    })
+
+    socket.on('clientToServerLobbyPlay', id => {
+        console.log(`play: ${rooms[id].p.length}`)
 
         io.to(id).emit('serverToClientGameStart')
     })
