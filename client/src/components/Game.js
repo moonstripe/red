@@ -1,10 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { useAnimation } from 'framer-motion';
 import { useSelector } from "react-redux";
 import { useParams } from 'react-router';
 import { PlayingCard } from "./Card";
 
 import { Paper, Grid, Typography, Modal, Box, Button, MenuItem, Select, InputLabel } from '@mui/material';
 import { SocketContext } from '../utils/SocketContext';
+
+function usePrevious(value) {
+    const ref = useRef();
+    useEffect(() => {
+        ref.current = value;
+    });
+    return ref.current;
+}
 
 const Game = ({ socket }) => {
     const nickname = useSelector(state => state.nickname.nickname);
@@ -26,9 +35,16 @@ const Game = ({ socket }) => {
     // visibility timer
     const [isVisible, setIsVisible] = useState(true)
 
+    // wtf
+    const oldPlayers = usePrevious(players)
+    const [animatedCards, setAnimatedCards] = useState([])
+    const controls = useAnimation();
+
     const [redCalled, setRedCalled] = useState(false);
     const [scoreboard, setScoreboard] = useState({});
     const [endGame, setEndGame] = useState(false);
+
+
 
     // Modal Stuff
     const [open, setOpen] = useState(false);
@@ -177,8 +193,7 @@ const Game = ({ socket }) => {
                                                                     {
                                                                         card === 0
                                                                             ? <PlayingCard />
-                                                                            // possible place to send feed info to server and then to other clients
-                                                                            : <PlayingCard onClick={canLook ? (event) => handleCardLook(event, card) : null} image={i > 1 ? `/cards/${card.visVal}${card.suit}.png` : `/cards/red_back.png`} />
+                                                                            : <PlayingCard onClick={canLook ? (event) => handleCardLook(event, card) : null} image={i > 1 ? `/cards/red_back.png` : `/cards/red_back.png`} />
                                                                     }
                                                                 </Grid>
                                                             ))
@@ -530,10 +545,10 @@ const Game = ({ socket }) => {
     // visibility timer
     useEffect(() => {
         const timer = setTimeout(() => {
-          setIsVisible(false);
+            setIsVisible(false);
         }, 10000);
         return () => clearTimeout(timer);
-      }, []);
+    }, []);
     // special card Rule
     useEffect(() => {
         console.log('top', nextCard.intVal)
@@ -569,15 +584,57 @@ const Game = ({ socket }) => {
         desiredCard && ditchedCard ? setCanConfirm(true) : setCanConfirm(false)
     }, [desiredCard, ditchedCard])
 
+    useEffect(() => {
+        if (oldPlayers && players) {
+            if (JSON.stringify(players) !== JSON.stringify(oldPlayers)) {
+                console.log('hi', oldPlayers.length)
+                const anomalyCards = []
+                for (let i = 0; i < oldPlayers.length; i++) {
+                    const oldPlayerHand = oldPlayers[i].h;
+                    const newPlayerHand = players[i].h;
+
+                    for (let j = 0; j < oldPlayerHand.length; j++) {
+                        const oldCard = oldPlayerHand[j];
+                        const newCard = newPlayerHand[j];
+
+                        console.log(`suits: old ${oldCard.suit}, new ${newCard.suit}, intVals: old ${oldCard.intVal}, new ${newCard.intVal}`)
+                        console.log(`suits check: ${oldCard.suit === newCard.suit}`)
+                        console.log(`intVal check: ${oldCard.intVal === newCard.intVal}`)
+                        console.log(`double check: ${oldCard.suit === newCard.suit && oldCard.intVal === newCard.intVal}`)
+                        
+                        if (!(oldCard.suit === newCard.suit && oldCard.intVal === newCard.intVal)){
+                            anomalyCards.push({
+                                's': oldPlayers[i].s,
+                                'i': j
+                            })
+                            console.log(`anomaly detected: Player ${oldPlayers[i].n} (socket: ${oldPlayers[i].s})'s  Old Card ${JSON.stringify(oldCard)} is now ${JSON.stringify(newCard)}`)
+                            
+                        }
+                    }
+                }
+                console.log(anomalyCards)
+                setAnimatedCards([])
+                setAnimatedCards([...anomalyCards])
+            }
+        }
+
+    }, [players, oldPlayers])
+
     // socket comms
+    useEffect(() => {
+        socket.on('serverToClientPlayers', (serverPlayers) => {
+
+            setPlayers([...serverPlayers]);
+
+            return () => {
+                socket.off('serverToClientPlayers');
+            }
+        });
+    }, [socket])
+
     useEffect(() => {
 
         socket.emit('clientToServerWelcome', [nickname, gameId]);
-
-        socket.on('serverToClientPlayers', (players) => {
-            // setSpecialOpen(false)
-            setPlayers([...players]);
-        });
 
         socket.on('serverToClientId', (id) => {
             setId(id);
@@ -601,9 +658,10 @@ const Game = ({ socket }) => {
         })
 
         return () => {
-            socket.off('serverToClientPlayers');
             socket.off('serverToClientId');
             socket.off('serverToClientGameState');
+            socket.off('serverToClientRedCalled');
+            socket.off('serverToClientEndGame');
         }
     }, [gameId, socket, nickname])
 
@@ -727,7 +785,11 @@ const Game = ({ socket }) => {
                                                                     card === 0
                                                                         ? <PlayingCard />
                                                                         // timer implementation here
-                                                                        : <PlayingCard onClick={() => handleCardSlap(card, i)} image={i > 1 && isVisible ? `/cards/${card.visVal}${card.suit}.png` : `/cards/red_back.png`} />
+                                                                        : <PlayingCard 
+                                                                        anomalous={
+                                                                            animatedCards.filter(c => c.s === player.s)[0]?.i === i ? true : false} 
+                                                                        onClick={() => handleCardSlap(card, i)} 
+                                                                        image={i > 1 && isVisible ? `/cards/${card.visVal}${card.suit}.png` : `/cards/red_back.png`} />
                                                                 }
                                                             </Grid>
                                                         ))
@@ -736,7 +798,11 @@ const Game = ({ socket }) => {
                                                                 {
                                                                     card === 0
                                                                         ? <PlayingCard />
-                                                                        : <PlayingCard onClick={() => handleCardSlap(card, i)} image={`/cards/red_back.png`} />
+                                                                        : <PlayingCard 
+                                                                        anomalous={
+                                                                            animatedCards.filter(c => c.s === player.s)[0]?.i === i ? true : false} 
+                                                                        onClick={() => handleCardSlap(card, i)} 
+                                                                        image={`/cards/red_back.png`} />
                                                                 }
                                                             </Grid>
                                                         ))

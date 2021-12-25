@@ -214,7 +214,6 @@ io.on('connection', socket => {
             io.to(gameId).emit('serverToClientPlayers', relevantGame.p)
             io.to(gameId).emit('serverToClientEndGame', ([scoreboard]))
         } else {
-            console.log('hello')
             relevantGame.t++;
         }
 
