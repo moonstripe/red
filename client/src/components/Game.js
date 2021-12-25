@@ -23,6 +23,9 @@ const Game = ({ socket }) => {
     const [ditchedCard, setDitchedCard] = useState(null)
     const [canConfirm, setCanConfirm] = useState(false)
 
+    // visibility timer
+    const [isVisible, setIsVisible] = useState(true)
+
     const [redCalled, setRedCalled] = useState(false);
     const [scoreboard, setScoreboard] = useState({});
     const [endGame, setEndGame] = useState(false);
@@ -486,7 +489,7 @@ const Game = ({ socket }) => {
                                                     card === 0
                                                         ? <PlayingCard />
                                                         // possible place to send feed info to server and then to other clients
-                                                        : <PlayingCard onClick={() => { turnOption === 'nextCard' ? handleCardSwap(card, i, nextCard) : handleCardSwap(card, i, discard[discard.length - 1]) }} image={`/cards/${card.visVal}${card.suit}.png`} />
+                                                        : <PlayingCard onClick={() => { turnOption === 'nextCard' ? handleCardSwap(card, i, nextCard) : handleCardSwap(card, i, discard[discard.length - 1]) }} image={`/cards/red_back.png`} />
                                                 }
                                             </Grid>
                                         ))
@@ -513,7 +516,7 @@ const Game = ({ socket }) => {
             transform: `translate(-${33}%, -${33}%)`,
             p: 1
         }}>
-            <Typography variant='h2'> Game Over </Typography>
+            <Typography variant='h2'>Game Over</Typography>
             {
                 players.map(p => (
                     <Box>
@@ -524,6 +527,13 @@ const Game = ({ socket }) => {
         </Box>
     );
 
+    // visibility timer
+    useEffect(() => {
+        const timer = setTimeout(() => {
+          setIsVisible(false);
+        }, 10000);
+        return () => clearTimeout(timer);
+      }, []);
     // special card Rule
     useEffect(() => {
         console.log('top', nextCard.intVal)
@@ -559,6 +569,7 @@ const Game = ({ socket }) => {
         desiredCard && ditchedCard ? setCanConfirm(true) : setCanConfirm(false)
     }, [desiredCard, ditchedCard])
 
+    // socket comms
     useEffect(() => {
 
         socket.emit('clientToServerWelcome', [nickname, gameId]);
@@ -649,7 +660,7 @@ const Game = ({ socket }) => {
                                         <Typography variant='h5' sx={{ textAlign: 'left' }}>Deck</Typography>
                                         {
                                             turnId === id
-                                                ? <PlayingCard onClick={() => handleOpen('nextCard')} image={`/cards/${nextCard.visVal}${nextCard.suit}.png`} />
+                                                ? <PlayingCard onClick={!isVisible ? () => handleOpen('nextCard') : null} image={`/cards/${nextCard.visVal}${nextCard.suit}.png`} />
                                                 : <PlayingCard image={`/cards/red_back.png`} />
                                         }
                                     </Box>
@@ -715,7 +726,8 @@ const Game = ({ socket }) => {
                                                                 {
                                                                     card === 0
                                                                         ? <PlayingCard />
-                                                                        : <PlayingCard onClick={() => handleCardSlap(card, i)} image={i > 1 ? `/cards/${card.visVal}${card.suit}.png` : `/cards/red_back.png`} />
+                                                                        // timer implementation here
+                                                                        : <PlayingCard onClick={() => handleCardSlap(card, i)} image={i > 1 && isVisible ? `/cards/${card.visVal}${card.suit}.png` : `/cards/red_back.png`} />
                                                                 }
                                                             </Grid>
                                                         ))
