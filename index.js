@@ -10,7 +10,7 @@ const server = require('http').createServer(app);
 const PORT = process.env.PORT || 8080;
 
 const DEV_ORG = '*'
-const PROD_ORG = 'https://kojinglick-aq2wgmt6ca-uc.a.run.app/'
+const PROD_ORG = 'https://red.moonstripe.com/'
 
 const io = socketio(server, {
     cors: {
